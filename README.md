@@ -21,7 +21,9 @@ Le TP repose sur trois machines connectées à un réseau privé :
 | Machine | Adresse IP | Rôle |
 
 | Windows | 192.168.56.1 | Client 1 |
+
 | VM1 Linux | 192.168.56.11 | Serveur MariaDB et Apache |
+
 | VM2 Linux | 192.168.56.12 | Client 2 |
 
 ## Travail réalisé
