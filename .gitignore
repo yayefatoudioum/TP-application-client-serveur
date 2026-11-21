@@ -1,1 +1,20 @@
+# Fichiers temporaires
+*.tmp
+*.temp
+*.log
 
+# Fichiers système Windows
+Thumbs.db
+Desktop.ini
+
+# Fichiers système macOS
+.DS_Store
+
+# Fichiers de configuration des éditeurs
+.vscode/
+.idea/
+
+# Fichiers compilés
+*.class
+*.o
+*.exe
