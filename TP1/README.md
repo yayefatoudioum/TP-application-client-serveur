@@ -127,6 +127,7 @@ Lorsque le serveur est arrêté, le client Windows obtient le message Can’t co
 Tous les clients sont affectés. Ce défaut d’architecture s’appelle le point unique de défaillance (single point of failure) : le serveur est un élément central, donc sa panne entraîne l’indisponibilité du service.
 
 ## Q15. Compte, requête et données dans la capture ; le mot de passe apparaît-il en clair ? Solution proposée.
+<img width="499" height="224" alt="image" src="https://github.com/user-attachments/assets/3c0c3e90-3bca-41a1-803b-dc11ccdbf745" />
 
 La capture permet d’identifier l’adresse IP source et l’adresse IP destination des paquets, ainsi que le port 3306, qui est le port de MariaDB (MySQL).
 
