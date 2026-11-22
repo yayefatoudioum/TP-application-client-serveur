@@ -69,7 +69,8 @@ C’est une bonne chose car si root était accessible depuis le réseau, une per
 Ces ports n’ont pas été choisis par MariaDB. Le serveur écoute sur le port 3306 ; lorsqu’un client se connecte, son système d’exploitation lui attribue un port temporaire, puis le client se connecte au port 3306 du serveur. Les ports sources sont donc différents de 3306, et différents d’un client à l’autre.
 
 ## Q8. Messages d’erreur obtenus. Où sont enregistrés les droits et qui les vérifie ? Conclusion pour la sécurité.
-<img width="521" height="196" alt="image" src="https://github.com/user-attachments/assets/6fa93e13-608f-4c74-a43f-ae782a4491bf" />
+<img width="339" height="100" alt="image" src="https://github.com/user-attachments/assets/892afc51-16a2-46ef-ad7a-abec9439bad4" />
+
 
 Avec le compte étudiant (Windows), la commande UPDATE est refusée. Avec le compte secretariat (VM2), c’est la commande DELETE qui est refusée.
 
