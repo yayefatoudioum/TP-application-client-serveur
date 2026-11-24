@@ -16,7 +16,7 @@ Dr Keba Gueye
 * **Présentation :** lignes **96 à 113** (menu et affichage), plus les lignes d’affichage placées dans les fonctions de relevé et de classement : 53-54, 61-63, 69, 73, 85, 91, 93.
 * **Logique métier :** 28-30 (validation de la note sur 10 et pondération par les crédits) ; 39-42 (calcul de la moyenne) ; 71-72 (décision Validé / Non validé) ; 85-88 et 92 (tri du classement, regroupement des notes par étudiant, comptage des admis).
 * **Accès aux données :** 22-26 (adresse du serveur, compte, mot de passe) ; 33-36 (fonction connexion ()) ; requêtes SQL en 47-48, 52-53, 58-59, 64-66 et 80-82 ; 45-48 (octets reçus ()).
-
+* **Les trois couches s'exécutent sur la machine client (Windows ou VM2)** 
 ## Q2. Quelles informations un étudiant qui récupère client_lourd.py obtient-il sur le serveur de base de données ? Que peut-il faire avec, en dehors du programme ?
 
 Il obtient l’adresse du serveur MariaDB (VM1, 192.168.56.11, port 3306), le nom d’utilisateur et le mot de passe en clair (etudiant / Etudiant@2026), le nom de la base (scolarite), ainsi que la structure des données (tables, colonnes) et les règles métier, lisibles dans le code.
