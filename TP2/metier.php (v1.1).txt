@@ -1,0 +1,159 @@
+<?php
+// inc/metier.php — LOGIQUE MÉTIER de l'application (tier 2).
+// Une seule copie pour tous les clients.
+
+require_once __DIR__ . '/config.php';
+
+const VERSION_APPLI = '1.1';
+const SEUIL_VALIDATION = 10.0;
+const NOTE_ELIMINATOIRE = 8;
+
+
+function bdd(): PDO {
+    static $pdo = null;
+
+    if ($pdo === null) {
+        $dsn = 'mysql:host=' . BDD_HOTE .
+               ';dbname=' . BDD_BASE .
+               ';charset=utf8mb4';
+
+        $pdo = new PDO(
+            $dsn,
+            BDD_UTILISATEUR,
+            BDD_MOT_DE_PASSE,
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_TIMEOUT => 5,
+            ]
+        );
+    }
+
+    return $pdo;
+}
+
+
+// Moyenne pondérée calculée par le SGBD.
+const SQL_MOYENNE = 'SUM(n.valeur * e.credits) / SUM(e.credits)';
+
+
+function etudiants(?string $filiere): array {
+    $sql = 'SELECT matricule, prenom, nom, filiere FROM etudiant';
+    $params = [];
+
+    if ($filiere) {
+        $sql .= ' WHERE filiere = ?';
+        $params[] = $filiere;
+    }
+
+    $req = bdd()->prepare(
+        $sql . ' ORDER BY nom, prenom LIMIT 200'
+    );
+
+    $req->execute($params);
+
+    return $req->fetchAll();
+}
+
+
+function releve(string $matricule): ?array {
+    $req = bdd()->prepare(
+        'SELECT matricule, prenom, nom, filiere
+         FROM etudiant WHERE matricule = ?'
+    );
+
+    $req->execute([$matricule]);
+    $etu = $req->fetch();
+
+    if (!$etu) {
+        return null;
+    }
+
+    $req = bdd()->prepare(
+        'SELECT e.code, e.intitule, e.credits, n.valeur
+         FROM note n JOIN ec e ON e.code = n.ec
+         WHERE n.matricule = ?
+         ORDER BY e.code'
+    );
+
+    $req->execute([$matricule]);
+    $etu['notes'] = $req->fetchAll();
+
+    $req = bdd()->prepare(
+        'SELECT ' . SQL_MOYENNE . ' AS moyenne
+         FROM note n JOIN ec e ON e.code = n.ec
+         WHERE n.matricule = ?'
+    );
+
+    $req->execute([$matricule]);
+    $etu['moyenne'] = (float) $req->fetchColumn();
+
+    // Nouvelle règle : une note strictement inférieure à 8 élimine.
+    $elimine = false;
+
+    foreach ($etu['notes'] as $note) {
+        if ((float) $note['valeur'] < NOTE_ELIMINATOIRE) {
+            $elimine = true;
+            break;
+        }
+    }
+
+    $etu['decision'] = (
+        $etu['moyenne'] >= SEUIL_VALIDATION && !$elimine
+    ) ? 'VALIDÉ' : 'NON VALIDÉ';
+
+    return $etu;
+}
+
+
+function classement(int $n = 10): array {
+    // Les 10 meilleures moyennes.
+    $req = bdd()->prepare(
+        'SELECT n.matricule, ' . SQL_MOYENNE . ' AS moyenne
+         FROM note n JOIN ec e ON e.code = n.ec
+         GROUP BY n.matricule
+         ORDER BY moyenne DESC
+         LIMIT ' . (int) $n
+    );
+
+    $req->execute();
+    $top = $req->fetchAll();
+
+    // Bilan général : les étudiants éliminés ne sont pas admis.
+    $req = bdd()->prepare(
+        'SELECT
+            COUNT(*) AS total,
+            SUM(m >= ? AND eliminatoires = 0) AS admis
+         FROM (
+            SELECT
+                ' . SQL_MOYENNE . ' AS m,
+                SUM(
+                    CASE
+                        WHEN n.valeur < ? THEN 1
+                        ELSE 0
+                    END
+                ) AS eliminatoires
+            FROM note n JOIN ec e ON e.code = n.ec
+            GROUP BY n.matricule
+         ) t'
+    );
+
+    $req->execute([
+        SEUIL_VALIDATION,
+        NOTE_ELIMINATOIRE
+    ]);
+
+    return [
+        'top' => $top,
+        'bilan' => $req->fetch()
+    ];
+}
+
+
+function h(?string $s): string {
+    return htmlspecialchars(
+        (string) $s,
+        ENT_QUOTES,
+        'UTF-8'
+    );
+}
